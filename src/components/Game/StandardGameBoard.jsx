@@ -4,6 +4,7 @@ import VirtualKeyboard from "./VirtualKeyboard/VirtualKeyboard.jsx";
 import getCurrentDayOfYearEST from "./DateHandler";
 import StopWatch from "./Stopwatch/Stopwatch";
 import {Box, Button, Paper} from "@mui/material";
+import { apiURL } from "../../hooks/api.js";
 
 export default function StandardGameBoard({
                                               guessStatus,
@@ -27,12 +28,12 @@ export default function StandardGameBoard({
     const [isPlaying, setIsPlaying] = useState(false)
 
     const currentDate = getCurrentDayOfYearEST();
-// console.log(`Today's date of ${currentDate} / 365`)
-
+    // console.log(last_played)
+    // console.log(`Today's date of ${currentDate} / 365`)
+    
     const userData = JSON.parse(localStorage.getItem("userData"));
     const username = userData.username;
-    const token = sessionStorage.getItem('usertoken')
-
+    
     const handleRowComplete = (rowIndex) => {
         //This correctly sets game over to True if you fail to get the correct guess after 5 guesses
         if (rowIndex === 5 && !correctGuess) {
@@ -43,11 +44,11 @@ export default function StandardGameBoard({
         }
     }
     let word = WOTD;
-
-// NEEEEED TO DO THIS PART AND FINISH THIS FUNCTION
+    
+    // NEEEEED TO DO THIS PART AND FINISH THIS FUNCTION
     async function getLastPlayed() {
         try {
-            const response = await fetch('http://localhost:3032/api/game/*****')
+            const response = await fetch(`${apiURL}/game/data/${username}`)
             const result = await response.json();
             console.log(result.last_played);
             //need to use result.last_played
@@ -57,18 +58,21 @@ export default function StandardGameBoard({
             console.error('Failure to get last time played', e);
         }
     }
-
-//need to add last_played POST AND GET REQUEST
-//Backend stat database needs "username", "correctGuess" which is T/F, "attempts" = # of guesses it took, "word" = WOTD
-    async function updateStats(username, correctGuess, attempts, word, currentDate) {
+    
+    //need to add last_played POST AND GET REQUEST
+    //Backend stat database needs "username", "correctGuess" which is T/F, "attempts" = # of guesses it took, "word" = WOTD
+    async function updateStats(username, correctGuess, attempts, word) {
+        
         try {
-            const response = await fetch(`http://localhost:3032/api/game/data/${username}/update`, {
+            const last_played = getCurrentDayOfYearEST();
+            // console.log("updated:",last_played);
+            const response = await fetch(`${apiURL}/game/data/${username}/update`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
                 },
-                body: JSON.stringify({username: username, last_played: currentDate})
+                body: JSON.stringify({username: username, last_played: last_played})
             });
             const info = await response.json();
             console.log(info);
@@ -76,7 +80,7 @@ export default function StandardGameBoard({
             console.error('Failure to update last played date', error);
         }
         try {
-            const response = await fetch('http://localhost:3032/api/game/regular', {
+            const response = await fetch(`${apiURL}/game/regular`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
