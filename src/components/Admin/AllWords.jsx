@@ -19,14 +19,23 @@ export default function AllWords() {
 
     return (
         <div>
-            <h1>Words List</h1>
-            <ul>
-                {words.map(words => (
-                    <li key={words.id}>
-                        {words.id}: {words.word}
-                    </li>
-                ))}
-            </ul>
+          <h1>Words List</h1>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Word</th>
+              </tr>
+            </thead>
+            <tbody>
+              {words.map(word => (
+                <tr key={word.id}>
+                  <td>{word.id}</td>
+                  <td>{word.word}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-    );
+      );
 }

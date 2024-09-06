@@ -33,8 +33,8 @@ export default function LogInComponent() {
         e.preventDefault();
         try {
             await login({username, password});
-            window.location.reload();
-            navigate('/account');
+            // window.location.reload();
+            navigate('/');
         } catch (err) {
             console.error('Failed to log in', err);
             setError('Login failed. Please try again.');
