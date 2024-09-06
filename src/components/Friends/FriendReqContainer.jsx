@@ -13,18 +13,19 @@ export default function FriendReqContainer() {
             setRequests(data);
         }
     };
+    console.log(requests);
 
     useEffect(() => {
         fetchRequests();
     }, []);
 
-    const handleAcceptClick = async (friend_username) => {
-        await acceptFriendRequest(friend_username);
+    const handleAcceptClick = async (user_username) => {
+        await acceptFriendRequest(user_username);
         await fetchRequests();
     };
 
-    const handleDeclineClick = async (friend_username) => {
-        await declineFriendRequest(friend_username);
+    const handleDeclineClick = async (user_username) => {
+        await declineFriendRequest(user_username);
         await fetchRequests();
     };
 
@@ -33,10 +34,12 @@ export default function FriendReqContainer() {
         await fetchRequests();
     };
 
-    const {pending = []} = requests;
+    const {pending = [], rejected = []} = requests;
 
     const receivedRequests = pending.filter(req => req.request_type === "received");
-    const rejectedRequests = pending.filter(req => req.request_type === "rejected");
+    const rejectedRequests = rejected.filter(req => req.status === "rejected");
+
+    console.log(receivedRequests, rejectedRequests);
 
     const requestsPerPage = 3;
     const rejectedPerPage = 2;
@@ -96,7 +99,7 @@ export default function FriendReqContainer() {
                                     sx={{padding: '0px 5px', margin: 0}}
                                     variant="contained"
                                     color="primary"
-                                    onClick={() => handleAcceptClick(request.friend_username)}
+                                    onClick={() => handleAcceptClick(request.user_username, request.friend_username)}
                                 >
                                     Accept
                                 </Button>
@@ -104,7 +107,7 @@ export default function FriendReqContainer() {
                                     sx={{padding: '0px 5px'}}
                                     variant="contained"
                                     color="error"
-                                    onClick={() => handleDeclineClick(request.friend_username)}
+                                    onClick={() => handleDeclineClick(request.user_username, request.friend_username)}
                                 >
                                     Decline
                                 </Button>
@@ -130,14 +133,17 @@ export default function FriendReqContainer() {
                 <Typography variant="h5">Rejected Requests</Typography>
                 {paginatedRejectedRequests.map((request, index) => (
                     <Card key={index} sx={{height: '85px'}}>
-                        <CardContent sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'space-between',
-                            height: '100%'
-                        }}>
-                            <Typography variant="body1">
-                                {request.friend_username}
+                        <CardContent
+                            sx={{
+                                padding: '0',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                height: '100%',
+                                justifyContent: 'space-between'
+                            }}>
+                            <Typography variant="body1" sx={{paddingTop: '5px'}}>
+                                {/* Display user_username instead of friend_username for rejected requests */}
+                                {request.user_username}
                             </Typography>
                             <Typography variant="body2">
                                 {new Date(request.created_at).toLocaleString('en-US', {
@@ -146,13 +152,21 @@ export default function FriendReqContainer() {
                                     month: '2-digit',
                                 })}
                             </Typography>
-                            <Button
-                                variant="contained"
-                                color="error"
-                                onClick={() => handleDeleteRequestClick(request.friend_username)}
-                            >
-                                Delete
-                            </Button>
+                            <Box
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-evenly',
+                                    alignItems: 'center',
+                                    paddingBottom: '5px'
+                                }}>
+                                <Button
+                                    variant="contained"
+                                    color="error"
+                                    onClick={() => handleDeleteRequestClick(request.user_username, request.friend_username)}
+                                >
+                                    Delete
+                                </Button>
+                            </Box>
                         </CardContent>
                     </Card>
                 ))}
@@ -162,7 +176,6 @@ export default function FriendReqContainer() {
                     page={rejectedPage}
                     onChange={(event, value) => setRejectedPage(value)}
                 />
-
             </Paper>
         </Paper>
     );

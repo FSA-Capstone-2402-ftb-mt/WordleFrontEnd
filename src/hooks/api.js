@@ -1,1 +1,1 @@
-export const apiURL = 'http://localhost:3032/api';
+export const apiURL = 'https://capstonebackend-gj0m.onrender.com/api';

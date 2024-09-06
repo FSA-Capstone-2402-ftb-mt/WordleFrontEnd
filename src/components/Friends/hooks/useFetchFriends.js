@@ -76,7 +76,7 @@ export async function acceptFriendRequest(friend_username) {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
             },
-            body: JSON.stringify(friend_username),
+            body: JSON.stringify({friend_username}),
         });
 
         return await response.json();
