@@ -5,6 +5,7 @@ import getCurrentDayOfYearEST from "./DateHandler";
 import StopWatch from "./Stopwatch/Stopwatch";
 import {Box, Button, Paper} from "@mui/material";
 import { apiURL } from "../../hooks/api.js";
+import { getLastPlayed } from "../Statistics/hooks/useFetchStatistics.js";
 
 export default function StandardGameBoard({
                                               guessStatus,
@@ -26,6 +27,7 @@ export default function StandardGameBoard({
     const [gameOver, setGameOver] = useState(false);
     const [correctGuess, setCorrectGuess] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false)
+    const[lastPlayed, setLastPlayed] = useState(null)
 
     const currentDate = getCurrentDayOfYearEST();
     // console.log(last_played)
@@ -46,18 +48,18 @@ export default function StandardGameBoard({
     let word = WOTD;
     
     // NEEEEED TO DO THIS PART AND FINISH THIS FUNCTION
-    async function getLastPlayed() {
-        try {
-            const response = await fetch(`${apiURL}/game/data/${username}`)
-            const result = await response.json();
-            console.log(result.last_played);
-            //need to use result.last_played
-            // const last_played = result.last_played but I will need to see what the
-            // return last_played
-        } catch (e) {
-            console.error('Failure to get last time played', e);
-        }
-    }
+    // async function getLastPlayed() {
+    //     try {
+    //         const response = await fetch(`${apiURL}/game/data/${username}`)
+    //         const result = await response.json();
+    //         console.log(result.last_played);
+    //         //need to use result.last_played
+    //         // const last_played = result.last_played but I will need to see what the
+    //         // return last_played
+    //     } catch (e) {
+    //         console.error('Failure to get last time played', e);
+    //     }
+    // }
     
     //need to add last_played POST AND GET REQUEST
     //Backend stat database needs "username", "correctGuess" which is T/F, "attempts" = # of guesses it took, "word" = WOTD
@@ -112,6 +114,22 @@ export default function StandardGameBoard({
     useEffect(() => {
         if (gameOver) console.log("Final time:", time)
     }, [gameOver])
+
+    useEffect(()=>{
+        const fetchLastPLayed = async () =>{
+            try{
+                const data = await getLastPlayed();
+                setLastPlayed(data)
+
+            }catch(e){
+                console.error('Failed to fetch last played date',e)
+            }
+        }
+        fetchLastPLayed();
+        console.log("effect:",lastPlayed)
+    },[])
+    console.log("fetch:", lastPlayed)
+    
     return (
         <Paper
         sx={{
@@ -119,7 +137,13 @@ export default function StandardGameBoard({
         }}
         >
             <div className="game-container">
-                {!isPlaying && (
+                {lastPlayed === currentDate ? (
+                    <div className="overlay">
+                        <h3>You have already played today! Come back tomorrow!</h3>
+                    </div>
+                ) : (    
+                    <>
+                    {!isPlaying && (
                     <div className="overlay">
                         <Button className="play-button" onClick={startGame}>
                             Play Game & Start Timer!
@@ -163,6 +187,8 @@ export default function StandardGameBoard({
                         fullGuess={fullGuess}
                     />
                 </div>
+                </>
+                )}
             </div>
         </Paper>
     );
