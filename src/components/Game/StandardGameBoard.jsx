@@ -6,6 +6,7 @@ import StopWatch from "./Stopwatch/Stopwatch";
 import {Box, Button, Paper} from "@mui/material";
 import { apiURL } from "../../hooks/api.js";
 import { getLastPlayed } from "../Statistics/hooks/useFetchStatistics.js";
+import SwitchLabels from "./SwitchLabels.jsx";
 
 export default function StandardGameBoard({
                                               guessStatus,
@@ -28,13 +29,14 @@ export default function StandardGameBoard({
     const [correctGuess, setCorrectGuess] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false)
     const[lastPlayed, setLastPlayed] = useState(null)
+    const [timerEnabled, setTimerEnabled] = useState(false)
 
     const currentDate = getCurrentDayOfYearEST();
     // console.log(last_played)
     // console.log(`Today's date of ${currentDate} / 365`)
     
-    const userData = JSON.parse(localStorage.getItem("userData"));
-    const username = userData.username;
+    // const userData = JSON.parse(localStorage.getItem("userData"));
+    // const username = userData.username;
     
     const handleRowComplete = (rowIndex) => {
         //This correctly sets game over to True if you fail to get the correct guess after 5 guesses
@@ -63,7 +65,9 @@ export default function StandardGameBoard({
     
     //need to add last_played POST AND GET REQUEST
     //Backend stat database needs "username", "correctGuess" which is T/F, "attempts" = # of guesses it took, "word" = WOTD
-    async function updateStats(username, correctGuess, attempts, word) {
+    async function updateStats(correctGuess, attempts, word) {
+        const userData = JSON.parse(localStorage.getItem("userData"));
+        const username = userData.username;
         
         try {
             const last_played = getCurrentDayOfYearEST();
@@ -100,7 +104,7 @@ export default function StandardGameBoard({
 //useEffect that runs UpdateStats when gameOver or activeRow changes
     useEffect(() => {
         if (gameOver) {
-            updateStats(username, correctGuess, activeRow, word)
+            updateStats(correctGuess, activeRow, word)
             setPauseTimer(true);
         }
     }, [activeRow, gameOver])
@@ -128,7 +132,6 @@ export default function StandardGameBoard({
         fetchLastPLayed();
         console.log("effect:",lastPlayed)
     },[])
-    console.log("fetch:", lastPlayed)
     
     return (
         <Paper
@@ -144,21 +147,37 @@ export default function StandardGameBoard({
                 ) : (    
                     <>
                     {!isPlaying && (
-                    <div className="overlay">
-                        <Button className="play-button" onClick={startGame}>
-                            Play Game & Start Timer!
-                        </Button>
+                    <div className="overlay" style={{ textAlign: 'center'}}>
+                        <div style={{marginBottom: '20px'}}>
+                            <SwitchLabels
+                                timerEnabled={timerEnabled}
+                                setTimerEnabled={setTimerEnabled}
+                            />
+                        </div>
+                        <div>
+                            {timerEnabled && (
+                                <Button 
+                                    className="play-button" 
+                                    onClick={startGame}
+                                    disabled={!timerEnabled}
+                                >
+                                    Play Game & Start Timer!
+                                </Button>
+                            )}
+                        </div>
                     </div>
                 )}
                 <Box className="timer-container">
-                    <StopWatch
-                        setStartTimer={setStartTimer}
-                        startTimer={startTimer}
-                        setPauseTimer={setPauseTimer}
-                        pauseTimer={pauseTimer}
-                        time={time}
-                        setTime={setTime}
-                    />
+                    {timerEnabled && (
+                        <StopWatch
+                            setStartTimer={setStartTimer}
+                            startTimer={startTimer}
+                            setPauseTimer={setPauseTimer}
+                            pauseTimer={pauseTimer}
+                            time={time}
+                            setTime={setTime}
+                        />
+                    )}
                 </Box>
                 <div className={`game-board ${isPlaying ? '' : 'disabled'}`}>
                     {guessStatus.map((_, index) => (
