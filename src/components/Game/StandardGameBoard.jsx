@@ -6,6 +6,7 @@ import StopWatch from "./Stopwatch/Stopwatch";
 import {Box, Button, Paper} from "@mui/material";
 import { apiURL } from "../../hooks/api.js";
 import { getLastPlayed } from "../Statistics/hooks/useFetchStatistics.js";
+import SwitchLabels from "./SwitchLabels.jsx";
 
 export default function StandardGameBoard({
                                               guessStatus,
@@ -28,13 +29,14 @@ export default function StandardGameBoard({
     const [correctGuess, setCorrectGuess] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false)
     const[lastPlayed, setLastPlayed] = useState(null)
+    const [timerEnabled, setTimerEnabled] = useState(false)
 
     const currentDate = getCurrentDayOfYearEST();
     // console.log(last_played)
     // console.log(`Today's date of ${currentDate} / 365`)
     
-    const userData = JSON.parse(localStorage.getItem("userData"));
-    const username = userData.username;
+    // const userData = JSON.parse(localStorage.getItem("userData"));
+    // const username = userData.username;
     
     const handleRowComplete = (rowIndex) => {
         //This correctly sets game over to True if you fail to get the correct guess after 5 guesses
@@ -47,60 +49,52 @@ export default function StandardGameBoard({
     }
     let word = WOTD;
     
-    // NEEEEED TO DO THIS PART AND FINISH THIS FUNCTION
-    // async function getLastPlayed() {
-    //     try {
-    //         const response = await fetch(`${apiURL}/game/data/${username}`)
-    //         const result = await response.json();
-    //         console.log(result.last_played);
-    //         //need to use result.last_played
-    //         // const last_played = result.last_played but I will need to see what the
-    //         // return last_played
-    //     } catch (e) {
-    //         console.error('Failure to get last time played', e);
-    //     }
-    // }
-    
     //need to add last_played POST AND GET REQUEST
     //Backend stat database needs "username", "correctGuess" which is T/F, "attempts" = # of guesses it took, "word" = WOTD
-    async function updateStats(username, correctGuess, attempts, word) {
+    async function updateStats(correctGuess, attempts, word) {
+        const userData = JSON.parse(localStorage.getItem("userData"));
         
-        try {
-            const last_played = getCurrentDayOfYearEST();
-            // console.log("updated:",last_played);
-            const response = await fetch(`${apiURL}/game/data/${username}/update`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                },
-                body: JSON.stringify({username: username, last_played: last_played})
-            });
-            const info = await response.json();
-            console.log(info);
-        } catch (error) {
-            console.error('Failure to update last played date', error);
-        }
-        try {
-            const response = await fetch(`${apiURL}/game/regular`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                },
-                body: JSON.stringify({username: username, correctGuess: correctGuess, attempts: attempts, word: word})
-            });
-            const info = await response.json();
-            console.log(info);
-        } catch (e) {
-            console.error('Failure to update stats', e)
+        if(userData && userData.username){
+            const username = userData.username;
+            try {
+                const last_played = getCurrentDayOfYearEST();
+                // console.log("updated:",last_played);
+                const response = await fetch(`${apiURL}/game/data/${username}/update`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    },
+                    body: JSON.stringify({username: username, last_played: last_played})
+                });
+                const info = await response.json();
+                console.log(info);
+            } catch (error) {
+                console.error('Failure to update last played date', error);
+            }
+            try {
+                const response = await fetch(`${apiURL}/game/regular`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    },
+                    body: JSON.stringify({username: username, correctGuess: correctGuess, attempts: attempts, word: word})
+                });
+                const info = await response.json();
+                console.log(info);
+            } catch (e) {
+                console.error('Failure to update stats', e)
+            }
+        }else{
+            console.error("no user data in local storage update stats")
         }
     }
 
 //useEffect that runs UpdateStats when gameOver or activeRow changes
     useEffect(() => {
         if (gameOver) {
-            updateStats(username, correctGuess, activeRow, word)
+            updateStats(correctGuess, activeRow, word)
             setPauseTimer(true);
         }
     }, [activeRow, gameOver])
@@ -116,19 +110,24 @@ export default function StandardGameBoard({
     }, [gameOver])
 
     useEffect(()=>{
-        const fetchLastPLayed = async () =>{
-            try{
-                const data = await getLastPlayed();
-                setLastPlayed(data)
+        const userData = JSON.parse(localStorage.getItem("userData"));
 
-            }catch(e){
-                console.error('Failed to fetch last played date',e)
+        if(userData && userData.username){
+            const username = userData.username;
+            const fetchLastPLayed = async () =>{
+                try{
+                    const data = await getLastPlayed();
+                    setLastPlayed(data)
+
+                }catch(e){
+                    console.error('Failed to fetch last played date',e)
+                }
             }
+            fetchLastPLayed();
+        }else{
+            console.error("Fetch last played has no user data in local storage")
         }
-        fetchLastPLayed();
-        console.log("effect:",lastPlayed)
     },[])
-    console.log("fetch:", lastPlayed)
     
     return (
         <Paper
@@ -144,21 +143,37 @@ export default function StandardGameBoard({
                 ) : (    
                     <>
                     {!isPlaying && (
-                    <div className="overlay">
-                        <Button className="play-button" onClick={startGame}>
-                            Play Game & Start Timer!
-                        </Button>
+                    <div className="overlay" style={{ textAlign: 'center'}}>
+                        <div style={{marginBottom: '20px'}}>
+                            <SwitchLabels
+                                timerEnabled={timerEnabled}
+                                setTimerEnabled={setTimerEnabled}
+                            />
+                        </div>
+                        <div>
+                            {timerEnabled && (
+                                <Button 
+                                    className="play-button" 
+                                    onClick={startGame}
+                                    disabled={!timerEnabled}
+                                >
+                                    Play Game & Start Timer!
+                                </Button>
+                            )}
+                        </div>
                     </div>
                 )}
                 <Box className="timer-container">
-                    <StopWatch
-                        setStartTimer={setStartTimer}
-                        startTimer={startTimer}
-                        setPauseTimer={setPauseTimer}
-                        pauseTimer={pauseTimer}
-                        time={time}
-                        setTime={setTime}
-                    />
+                    {timerEnabled && (
+                        <StopWatch
+                            setStartTimer={setStartTimer}
+                            startTimer={startTimer}
+                            setPauseTimer={setPauseTimer}
+                            pauseTimer={pauseTimer}
+                            time={time}
+                            setTime={setTime}
+                        />
+                    )}
                 </Box>
                 <div className={`game-board ${isPlaying ? '' : 'disabled'}`}>
                     {guessStatus.map((_, index) => (
