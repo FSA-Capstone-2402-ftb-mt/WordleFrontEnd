@@ -49,55 +49,45 @@ export default function StandardGameBoard({
     }
     let word = WOTD;
     
-    // NEEEEED TO DO THIS PART AND FINISH THIS FUNCTION
-    // async function getLastPlayed() {
-    //     try {
-    //         const response = await fetch(`${apiURL}/game/data/${username}`)
-    //         const result = await response.json();
-    //         console.log(result.last_played);
-    //         //need to use result.last_played
-    //         // const last_played = result.last_played but I will need to see what the
-    //         // return last_played
-    //     } catch (e) {
-    //         console.error('Failure to get last time played', e);
-    //     }
-    // }
-    
     //need to add last_played POST AND GET REQUEST
     //Backend stat database needs "username", "correctGuess" which is T/F, "attempts" = # of guesses it took, "word" = WOTD
     async function updateStats(correctGuess, attempts, word) {
         const userData = JSON.parse(localStorage.getItem("userData"));
-        const username = userData.username;
         
-        try {
-            const last_played = getCurrentDayOfYearEST();
-            // console.log("updated:",last_played);
-            const response = await fetch(`${apiURL}/game/data/${username}/update`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                },
-                body: JSON.stringify({username: username, last_played: last_played})
-            });
-            const info = await response.json();
-            console.log(info);
-        } catch (error) {
-            console.error('Failure to update last played date', error);
-        }
-        try {
-            const response = await fetch(`${apiURL}/game/regular`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                },
-                body: JSON.stringify({username: username, correctGuess: correctGuess, attempts: attempts, word: word})
-            });
-            const info = await response.json();
-            console.log(info);
-        } catch (e) {
-            console.error('Failure to update stats', e)
+        if(userData && userData.username){
+            const username = userData.username;
+            try {
+                const last_played = getCurrentDayOfYearEST();
+                // console.log("updated:",last_played);
+                const response = await fetch(`${apiURL}/game/data/${username}/update`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    },
+                    body: JSON.stringify({username: username, last_played: last_played})
+                });
+                const info = await response.json();
+                console.log(info);
+            } catch (error) {
+                console.error('Failure to update last played date', error);
+            }
+            try {
+                const response = await fetch(`${apiURL}/game/regular`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    },
+                    body: JSON.stringify({username: username, correctGuess: correctGuess, attempts: attempts, word: word})
+                });
+                const info = await response.json();
+                console.log(info);
+            } catch (e) {
+                console.error('Failure to update stats', e)
+            }
+        }else{
+            console.error("no user data in local storage update stats")
         }
     }
 
@@ -120,17 +110,23 @@ export default function StandardGameBoard({
     }, [gameOver])
 
     useEffect(()=>{
-        const fetchLastPLayed = async () =>{
-            try{
-                const data = await getLastPlayed();
-                setLastPlayed(data)
+        const userData = JSON.parse(localStorage.getItem("userData"));
 
-            }catch(e){
-                console.error('Failed to fetch last played date',e)
+        if(userData && userData.username){
+            const username = userData.username;
+            const fetchLastPLayed = async () =>{
+                try{
+                    const data = await getLastPlayed();
+                    setLastPlayed(data)
+
+                }catch(e){
+                    console.error('Failed to fetch last played date',e)
+                }
             }
+            fetchLastPLayed();
+        }else{
+            console.error("Fetch last played has no user data in local storage")
         }
-        fetchLastPLayed();
-        console.log("effect:",lastPlayed)
     },[])
     
     return (
