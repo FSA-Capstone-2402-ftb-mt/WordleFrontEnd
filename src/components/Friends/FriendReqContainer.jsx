@@ -13,7 +13,6 @@ export default function FriendReqContainer() {
             setRequests(data);
         }
     };
-    console.log(requests);
 
     useEffect(() => {
         fetchRequests();
@@ -39,8 +38,6 @@ export default function FriendReqContainer() {
     const receivedRequests = pending.filter(req => req.request_type === "received");
     const rejectedRequests = rejected.filter(req => req.status === "rejected");
 
-    console.log(receivedRequests, rejectedRequests);
-
     const requestsPerPage = 3;
     const rejectedPerPage = 2;
 
@@ -59,7 +56,7 @@ export default function FriendReqContainer() {
             height: '600px'
         }}>
 
-            <Paper sx={{
+            <Box sx={{
                 height: '900px',
                 display: 'flex',
                 flexDirection: 'column',
@@ -69,7 +66,7 @@ export default function FriendReqContainer() {
             }}>
                 <Typography variant="h6">Pending Requests</Typography>
                 {paginatedReceivedRequests.map((request, index) => (
-                    <Card key={index} sx={{height: '85px'}}>
+                    <Card key={index} sx={{height: '80px'}}>
                         <CardContent
                             sx={{
                                 padding: '0',
@@ -121,10 +118,10 @@ export default function FriendReqContainer() {
                     page={receivedPage}
                     onChange={(event, value) => setReceivedPage(value)}
                 />
-            </Paper>
+            </Box>
 
             {/* Rejected Requests Section */}
-            <Paper sx={{
+            <Box sx={{
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
@@ -132,7 +129,7 @@ export default function FriendReqContainer() {
             }}>
                 <Typography variant="h5">Rejected Requests</Typography>
                 {paginatedRejectedRequests.map((request, index) => (
-                    <Card key={index} sx={{height: '85px'}}>
+                    <Card key={index} sx={{height: '80px'}}>
                         <CardContent
                             sx={{
                                 padding: '0',
@@ -160,6 +157,7 @@ export default function FriendReqContainer() {
                                     paddingBottom: '5px'
                                 }}>
                                 <Button
+                                    sx={{padding: '0px 5px'}}
                                     variant="contained"
                                     color="error"
                                     onClick={() => handleDeleteRequestClick(request.user_username, request.friend_username)}
@@ -176,7 +174,7 @@ export default function FriendReqContainer() {
                     page={rejectedPage}
                     onChange={(event, value) => setRejectedPage(value)}
                 />
-            </Paper>
+            </Box>
         </Paper>
     );
 }

@@ -37,7 +37,7 @@ export default function FriendListContainer() {
     const displayFriends = friends.slice((currentPage - 1) * friendsPerPage, currentPage * friendsPerPage);
 
     return (<Paper elevation={3} sx={{
-        width: '250px',
+        width: '320px',
         padding: 2,
         display: 'flex',
         flexDirection: 'column',
@@ -49,7 +49,7 @@ export default function FriendListContainer() {
         <Box flexGrow={1} display="flex" flexDirection="column" justifyContent="flex-start" alignItems="center"
              gap={2}>
             {displayFriends.length > 0 ? (displayFriends.map((friend) => (
-                <Card key={friend.friend} sx={{width: '100%'}}>
+                <Card key={friend.friend} sx={{width: '100%', height: '80px'}}>
                     <CardContent sx={{
                         display: 'flex',
                         justifyContent: 'center',
@@ -86,8 +86,6 @@ export default function FriendListContainer() {
             sx={{display: 'flex', justifyContent: 'center', marginTop: 2}}
             siblingCount={0}
             boundaryCount={1}
-            showFirstButton
-            showLastButton
         />
     </Paper>);
 }

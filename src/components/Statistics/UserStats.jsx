@@ -1,9 +1,10 @@
 import {useEffect, useState} from "react";
 import {fetchUserStats} from "./hooks/useFetchStatistics";
-import {Grid, Paper, Typography, Divider} from "@mui/material";
+import {Paper, Typography, Box} from "@mui/material";
 
 function StatsUser() {
     const [userStats, setUserStats] = useState([]);
+
     useEffect(() => {
         const stats = async () => {
             const res = await fetchUserStats();
@@ -19,43 +20,48 @@ function StatsUser() {
     });
 
     return (
-        <>
-            <Typography variant="h3">{userStats.username} 's Stats </Typography>
-            <Divider sx={{my: 1}} />
+        <Box>
+            <Typography variant="h3">{userStats.username}'s Stats</Typography>
 
-            <Grid container spacing={3} justifyContent={"center"}>
-                <Grid item xs={4} sm={3}>
-                    <Paper elevation={1} sx={{padding: 2}}>
+            <Box
+                display="flex"
+                justifyContent="center"
+                flexWrap="wrap"
+                gap={3}
+                sx={{ marginTop: 3 }}
+            >
+                <Box>
+                    <Paper elevation={1} sx={{ padding: 2, margin: '10px', width: '150px' }}>
                         <Typography variant="h6" align="center">{date}</Typography>
                         <Typography variant="body2" align="center">Joined Date</Typography>
                     </Paper>
-                </Grid>
-                <Grid item xs={4} sm={3}>
-                    <Paper elevation={1} sx={{padding: 2}}>
+                </Box>
+                <Box>
+                    <Paper elevation={1} sx={{ padding: 2, margin: '10px', width: '150px' }}>
                         <Typography variant="h6" align="center">{userStats.word_count}</Typography>
                         <Typography variant="body2" align="center">Words Solved</Typography>
                     </Paper>
-                </Grid>
-                <Grid item xs={4} sm={3}>
-                    <Paper elevation={1} sx={{padding: 2}}>
+                </Box>
+                <Box>
+                    <Paper elevation={1} sx={{ padding: 2, margin: '10px', width: '150px' }}>
                         <Typography variant="h6" align="center">{userStats.current_streak}</Typography>
                         <Typography variant="body2" align="center">Current Streak</Typography>
                     </Paper>
-                </Grid>
-                <Grid item xs={4} sm={3}>
-                    <Paper elevation={1} sx={{padding: 2}}>
+                </Box>
+                <Box>
+                    <Paper elevation={1} sx={{ padding: 2, margin: '10px', width: '150px' }}>
                         <Typography variant="h6" align="center">{userStats.max_streak}</Typography>
                         <Typography variant="body2" align="center">Max Streak</Typography>
                     </Paper>
-                </Grid>
-                <Grid item xs={4} sm={3}>
-                    <Paper elevation={1} sx={{padding: 2}}>
+                </Box>
+                <Box>
+                    <Paper elevation={1} sx={{ padding: 2, margin: '10px', width: '150px' }}>
                         <Typography variant="h6" align="center">{userStats.timed_score}</Typography>
                         <Typography variant="body2" align="center">Timed Score</Typography>
                     </Paper>
-                </Grid>
-            </Grid>
-        </>
+                </Box>
+            </Box>
+        </Box>
     );
 }
 
