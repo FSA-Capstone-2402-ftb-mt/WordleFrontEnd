@@ -16,8 +16,7 @@ export async function adminfetchUsers() {
         if (!response.ok) {
             console.log("Error fetching users");
         }
-        const data = await response.json();
-        return data;
+        return await response.json();
     } catch (error) {
         console.error(error)
     }

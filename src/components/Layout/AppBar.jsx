@@ -1,13 +1,14 @@
 import * as React from 'react';
-import {useState, useEffect} from 'react'
+import {useState, useEffect, useContext} from 'react'
 import { AppBar, Toolbar, Typography, Button, Container, Box, IconButton, Menu, MenuItem, Avatar, Tooltip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from "../../hooks/useAuth.js";
+import {AuthContext} from "../../../Context/AuthContext.jsx";
+import {Link} from 'react-router-dom';
 
 const centerPages = ['Game', 'Leaderboard'];
 
 function ResponsiveAppBar() {
-    const { isAuthenticated, isAdmin, user, logout } = useAuth();
+    const { isAuthenticated, isAdmin, user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const [anchorElUser, setAnchorElUser] = useState(null);
@@ -26,7 +27,7 @@ function ResponsiveAppBar() {
 
     const handleAccountClick = () => {
         if (isAuthenticated) {
-            navigate(`/account`);
+            navigate(`/`);
         } else {
             navigate(`/authenticate`);
         }
@@ -38,29 +39,35 @@ function ResponsiveAppBar() {
         handleCloseUserMenu();
     };
 
+    const handleLogoutClick = () => {
+        logout();
+        navigate('/');
+    }
+
     return (
         <AppBar position="absolute">
-            <Container maxWidth="xl">
+            <Container maxWidth="xxl">
                 <Toolbar disableGutters>
                     <Typography
                         variant="h6"
                         noWrap
-                        component="a"
-                        href="/"
+                        component={Link}
+                        to="/"
                         sx={{
-                            mr: 2,
-                            display: { xs: 'none', md: 'flex' },
+                            mr: 1,
+                            display: { xs: 'none', md: 'flex', flexDirection: 'column',justifyContent: 'center' },
                             fontFamily: 'monospace',
                             fontWeight: 700,
                             letterSpacing: '.3rem',
                             color: 'inherit',
                             textDecoration: 'none',
+                            height:'70px',
                         }}
                     >
                         Wordle
                     </Typography>
 
-                    <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
+                    <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: 'center'}}>
                         {centerPages.map((page) => (
                             <Button
                                 key={page}
@@ -113,7 +120,7 @@ function ResponsiveAppBar() {
                                 </MenuItem>
                             )}
                             {isAuthenticated && (
-                                <MenuItem key="logout" onClick={logout}>
+                                <MenuItem key="logout" onClick={handleLogoutClick}>
                                     <Typography textAlign="center">Log Out</Typography>
                                 </MenuItem>
                             )}

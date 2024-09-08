@@ -12,12 +12,12 @@ import {
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import {useEffect, useState} from 'react';
+import {useContext, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {useAuth} from '../hooks/useAuth';
+import {AuthContext} from "../../Context/AuthContext.jsx";
 
 export default function LogInComponent() {
-    const {login} = useAuth();
+    const {login} = useContext(AuthContext);
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -33,8 +33,7 @@ export default function LogInComponent() {
         e.preventDefault();
         try {
             await login({username, password});
-            window.location.reload();
-            navigate('/account');
+            navigate('/');
         } catch (err) {
             console.error('Failed to log in', err);
             setError('Login failed. Please try again.');
