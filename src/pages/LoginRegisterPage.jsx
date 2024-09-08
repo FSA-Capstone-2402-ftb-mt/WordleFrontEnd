@@ -125,7 +125,7 @@ const FormContainer = styled('div')`
     margin: 0 auto;
     max-width: 400px; 
     padding: 20px;
-    box-shadow: 0px 4px 30px ${grey[200]};
+    box-shadow: 0 4px 30px ${grey[200]};
     border-radius: 12px;
     background-color: #fff;
 `;
