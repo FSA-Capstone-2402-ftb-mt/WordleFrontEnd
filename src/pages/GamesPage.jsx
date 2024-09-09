@@ -10,14 +10,24 @@ const GamesPage = () => {
     const [pauseTimer, setPauseTimer] = useState(true);
     const [time, setTime] = useState(0);
 
+
+
     const [WOTD, setWOTD] = useState('APPLE')
 
     //get from api
     // if(todaysDate === API)
     const getNewWOTD = async () => {
-        const newWOTD = await getWOTD();
-        setWOTD(newWOTD);
-        return WOTD
+        try{
+            const newWOTD = await getWOTD();
+            if(newWOTD){
+                setWOTD(newWOTD);
+                console.log(newWOTD)
+            }else{
+                console.error("WOTD fetch returned an empty value")
+            }
+        }catch(e){
+            console.error("failed to get new WOTD", e)
+        }
     }
     useEffect(() => {
         getNewWOTD();

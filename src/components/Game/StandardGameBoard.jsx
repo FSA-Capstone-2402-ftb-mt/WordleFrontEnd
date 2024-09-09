@@ -33,7 +33,6 @@ export default function StandardGameBoard({
     const [toggleDisabled, setToggleDisabled] = useState(false);
 
     const currentDate = getCurrentDayOfYearEST();
-
     
     const handleRowComplete = (rowIndex) => {
         //This correctly sets game over to True if you fail to get the correct guess after 5 guesses
