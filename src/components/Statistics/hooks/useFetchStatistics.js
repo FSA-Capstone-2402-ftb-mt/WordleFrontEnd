@@ -58,4 +58,5 @@ export async function fetchGuessStats() {
     } catch (error) {
         console.log(`Fetch request error`,error)
     }
-};
+}
+
