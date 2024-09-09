@@ -5,6 +5,8 @@ import getCurrentDayOfYearEST from "./DateHandler";
 import StopWatch from "./Stopwatch/Stopwatch";
 import {Box, Button, Paper} from "@mui/material";
 import { apiURL } from "../../hooks/api.js";
+import { getLastPlayed } from "../Statistics/hooks/useFetchStatistics.js";
+import SwitchLabels from "./SwitchLabels.jsx";
 
 export default function StandardGameBoard({
                                               guessStatus,
@@ -26,13 +28,12 @@ export default function StandardGameBoard({
     const [gameOver, setGameOver] = useState(false);
     const [correctGuess, setCorrectGuess] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false)
+    const[lastPlayed, setLastPlayed] = useState(null)
+    const [timerEnabled, setTimerEnabled] = useState(false)
+    const [toggleDisabled, setToggleDisabled] = useState(false);
 
     const currentDate = getCurrentDayOfYearEST();
-    // console.log(last_played)
-    // console.log(`Today's date of ${currentDate} / 365`)
-    
-    const userData = JSON.parse(localStorage.getItem("userData"));
-    const username = userData.username;
+
     
     const handleRowComplete = (rowIndex) => {
         //This correctly sets game over to True if you fail to get the correct guess after 5 guesses
@@ -45,73 +46,117 @@ export default function StandardGameBoard({
     }
     let word = WOTD;
     
-    // NEEEEED TO DO THIS PART AND FINISH THIS FUNCTION
-    async function getLastPlayed() {
-        try {
-            const response = await fetch(`${apiURL}/game/data/${username}`)
-            const result = await response.json();
-            console.log(result.last_played);
-            //need to use result.last_played
-            // const last_played = result.last_played but I will need to see what the
-            // return last_played
-        } catch (e) {
-            console.error('Failure to get last time played', e);
-        }
-    }
-    
     //need to add last_played POST AND GET REQUEST
     //Backend stat database needs "username", "correctGuess" which is T/F, "attempts" = # of guesses it took, "word" = WOTD
-    async function updateStats(username, correctGuess, attempts, word) {
+    async function updateStats(correctGuess, attempts, word) {
+        const userData = JSON.parse(localStorage.getItem("userData"));
         
-        try {
-            const last_played = getCurrentDayOfYearEST();
-            // console.log("updated:",last_played);
-            const response = await fetch(`${apiURL}/game/data/${username}/update`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                },
-                body: JSON.stringify({username: username, last_played: last_played})
-            });
-            const info = await response.json();
-            console.log(info);
-        } catch (error) {
-            console.error('Failure to update last played date', error);
-        }
-        try {
-            const response = await fetch(`${apiURL}/game/regular`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                },
-                body: JSON.stringify({username: username, correctGuess: correctGuess, attempts: attempts, word: word})
-            });
-            const info = await response.json();
-            console.log(info);
-        } catch (e) {
-            console.error('Failure to update stats', e)
+        if(userData && userData.username){
+            const username = userData.username;
+            try {
+                const last_played = getCurrentDayOfYearEST();
+                // console.log("updated:",last_played);
+                const response = await fetch(`${apiURL}/game/data/${username}/update`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    },
+                    body: JSON.stringify({username: username, last_played: last_played})
+                });
+                const info = await response.json();
+                console.log(info);
+            } catch (error) {
+                console.error('Failure to update last played date', error);
+            }
+            try {
+                const response = await fetch(`${apiURL}/game/regular`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    },
+                    body: JSON.stringify({username: username, correctGuess: correctGuess, attempts: attempts, word: word})
+                });
+                const info = await response.json();
+                console.log(info);
+            } catch (e) {
+                console.error('Failure to update stats', e)
+            }
+        }else{
+            console.error("no user data in local storage update stats")
         }
     }
 
 //useEffect that runs UpdateStats when gameOver or activeRow changes
     useEffect(() => {
         if (gameOver) {
-            updateStats(username, correctGuess, activeRow, word)
+            updateStats(correctGuess, activeRow, word)
             setPauseTimer(true);
+            const today = getCurrentDayOfYearEST();
+            localStorage.setItem('lastPlayed', today);
         }
-    }, [activeRow, gameOver])
+    }, [gameOver])
+
+    useEffect(()=>{
+        if(activeRow > 0 || gameOver){
+            setToggleDisabled(true);
+        }
+    },[activeRow, gameOver])
 
     const startGame = () => {
         setIsPlaying(true);
         setStartTimer(true);
         setPauseTimer(false);
+        setToggleDisabled(true);
     }
-
+    //making sure it logs the correct time when the timed game stops.
     useEffect(() => {
-        if (gameOver) console.log("Final time:", time)
+        if (gameOver && timerEnabled) console.log("Final time:", time)
     }, [gameOver])
+
+    //gets the user.data from local storage and from the database itself to make sure the user can't play twice in one day
+    useEffect(() => {
+        const userData = JSON.parse(localStorage.getItem("userData"));
+        // Log user data
+        // console.log("User data from localStorage:", userData);
+    
+        // if (userData && userData.username) {
+        //     const fetchLastPlayed = async () => {
+        //         try {
+        //             const data = await getLastPlayed();
+        //             console.log("Last played from API:", data);  // Log data from API
+        //             setLastPlayed(data); 
+        //         } catch (e) {
+        //             console.error('Failed to fetch last played date from API', e);
+        //         }
+        //     };
+        //     fetchLastPlayed();
+        // }
+    
+        const storedLastPlayed = localStorage.getItem('lastPlayed'); // Retrieve lastPlayed from localStorage
+        console.log("Last played from localStorage:", storedLastPlayed);  // Log the last played date from localStorage
+    
+        const today = getCurrentDayOfYearEST().toString();  // Get today's date
+        console.log("Today's date:", today);  // Log today's date
+    
+        // Compare the stored date with today's date
+        if (storedLastPlayed && storedLastPlayed === today) {
+            setLastPlayed(today);  // Disable the game if the user has already played today
+        }else if (userData && userData.username){
+            const fetchLastPlayed = async () => {
+                try {
+                    const data = await getLastPlayed();
+                    console.log("Last played from API:", data);  // Log data from API
+                    setLastPlayed(data); 
+                } catch (e) {
+                    console.error('Failed to fetch last played date from API', e);
+                }
+            };
+            fetchLastPlayed();
+        }
+    },[]);
+    
     return (
         <Paper
         sx={{
@@ -119,22 +164,46 @@ export default function StandardGameBoard({
         }}
         >
             <div className="game-container">
-                {!isPlaying && (
+                {lastPlayed == currentDate.toString() ? (
                     <div className="overlay">
-                        <Button className="play-button" onClick={startGame}>
-                            Play Game & Start Timer!
-                        </Button>
+                        <h3>You have already played today! Come back tomorrow!</h3>
+                    </div>
+                ) : (    
+                    <>
+                    {!isPlaying && (
+                    <div className="overlay" style={{ textAlign: 'center'}}>
+                        <div style={{marginBottom: '20px'}}>
+                            <SwitchLabels
+                                timerEnabled={timerEnabled}
+                                setTimerEnabled={setTimerEnabled}
+                                disabled={toggleDisabled}
+                                hide={toggleDisabled}
+                            />
+                        </div>
+                        <div>
+                            {timerEnabled && (
+                                <Button 
+                                    className="play-button" 
+                                    onClick={startGame}
+                                    disabled={!timerEnabled}
+                                >
+                                    Play Game & Start Timer!
+                                </Button>
+                            )}
+                        </div>
                     </div>
                 )}
                 <Box className="timer-container">
-                    <StopWatch
-                        setStartTimer={setStartTimer}
-                        startTimer={startTimer}
-                        setPauseTimer={setPauseTimer}
-                        pauseTimer={pauseTimer}
-                        time={time}
-                        setTime={setTime}
-                    />
+                    {timerEnabled && (
+                        <StopWatch
+                            setStartTimer={setStartTimer}
+                            startTimer={startTimer}
+                            setPauseTimer={setPauseTimer}
+                            pauseTimer={pauseTimer}
+                            time={time}
+                            setTime={setTime}
+                        />
+                    )}
                 </Box>
                 <div className={`game-board ${isPlaying ? '' : 'disabled'}`}>
                     {guessStatus.map((_, index) => (
@@ -163,6 +232,8 @@ export default function StandardGameBoard({
                         fullGuess={fullGuess}
                     />
                 </div>
+                </>
+                )}
             </div>
         </Paper>
     );

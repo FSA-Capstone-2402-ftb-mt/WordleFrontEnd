@@ -1,24 +1,24 @@
 import * as React from 'react';
+import { useState, useContext } from 'react';
 import {
+    Box,
     Button,
     FormControl,
+    IconButton,
+    InputAdornment,
     InputLabel,
     OutlinedInput,
-    InputAdornment,
-    IconButton,
     TextField,
-    Box,
     Typography,
 } from '@mui/material';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { AuthContext } from '../../Context/AuthContext.jsx';
 
 export default function RegisterComponent() {
-    const { register } = useAuth();
+    const { register } = useContext(AuthContext);
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
@@ -26,22 +26,33 @@ export default function RegisterComponent() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleClickShowPassword = () => setShowPassword(!showPassword);
     const handleMouseDownPassword = (event) => event.preventDefault();
 
     const handleRegister = async (e) => {
         e.preventDefault();
+        setError(''); // Clear any previous error message
+        if (!username || !email || !password || !confirmPassword) {
+            setError("All fields are required");
+            return;
+        }
+
         if (password !== confirmPassword) {
             setError("Passwords do not match");
             return;
         }
+
         try {
-            await register({ username, password });
+            setIsSubmitting(true);
+            await register({ username, email, password });
             navigate('/');
         } catch (err) {
             console.error('Failed to register', err);
             setError("Registration failed. Please try again.");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -133,6 +144,7 @@ export default function RegisterComponent() {
                 fullWidth
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
+                disabled={isSubmitting} // Disable button during submission
             >
                 Register
             </Button>
