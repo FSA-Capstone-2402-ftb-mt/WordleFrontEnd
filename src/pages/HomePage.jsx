@@ -6,7 +6,7 @@ const HomePage = () => {
             <h1>Welcome to WordleGame!</h1>
             <p>Challenge your vocabulary and try to guess the word of the day. Play solo or compete against friends!</p>
             <div className="home-buttons">
-                <Link to="/games">Play Now</Link>
+                <Link to="/game">Play Now</Link>
                 <Link to="/instruction">How to Play</Link>
                 <Link to="/friends">Manage Friends</Link>
                 <Link to="/statistics">View Statistics</Link>
