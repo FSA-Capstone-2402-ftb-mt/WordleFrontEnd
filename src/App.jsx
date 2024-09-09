@@ -11,7 +11,7 @@ import AllUsers from "./components/Admin/AllUsers.jsx";
 import LeaderboardPage from "./pages/LeaderboardPage.jsx";
 import AppBar from "./components/Layout/AppBar.jsx";
 import LoginRegisterPage from "./pages/LoginRegisterPage.jsx";
-import AllMonthlyWords from "./components/Admin/WordsCalendar.jsx";
+import AllMonthlyWords from "./components/Admin/subcomponents/WordsCalendar.jsx";
 import GamePage from "/src/pages/GamesPage.jsx";
 import InstructionPage from './pages/InstructionPage.jsx';
 

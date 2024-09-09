@@ -22,6 +22,7 @@ const GamesPage = () => {
     useEffect(() => {
         getNewWOTD();
     }, [])
+    
 
     return (
         <StandardGameBoard

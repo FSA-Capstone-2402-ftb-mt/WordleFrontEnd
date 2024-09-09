@@ -1,6 +1,8 @@
+import { apiURL } from "../../../hooks/api";
+
 export default async function getWOTD() {
     try {
-        const response = await fetch('http://localhost:3032/api/words/wordOf/todaysWord', {
+        const response = await fetch(`${apiURL}/words/wordOf/todaysWord`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

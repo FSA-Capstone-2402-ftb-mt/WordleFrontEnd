@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {adminfetchWords} from "./hooks/useFetchWords.js";
+import {adminfetchWords} from "../hooks/useFetchWords.js";
 import {Box, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@mui/material';
 import {useNavigate} from "react-router-dom";
 
