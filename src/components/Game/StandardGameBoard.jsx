@@ -33,7 +33,7 @@ export default function StandardGameBoard({
     const [toggleDisabled, setToggleDisabled] = useState(false);
 
     const currentDate = getCurrentDayOfYearEST();
-    const localLastPlayed = localStorage.getItem('Last_played')
+
     
     const handleRowComplete = (rowIndex) => {
         //This correctly sets game over to True if you fail to get the correct guess after 5 guesses
@@ -89,13 +89,14 @@ export default function StandardGameBoard({
     }
 
 //useEffect that runs UpdateStats when gameOver or activeRow changes
-    useEffect((currentDate) => {
+    useEffect(() => {
         if (gameOver) {
             updateStats(correctGuess, activeRow, word)
             setPauseTimer(true);
-            localStorage.setItem('Last_played', currentDate)
+            const today = getCurrentDayOfYearEST();
+            localStorage.setItem('lastPlayed', today);
         }
-    }, [activeRow, gameOver])
+    }, [gameOver])
 
     useEffect(()=>{
         if(activeRow > 0 || gameOver){
@@ -109,30 +110,52 @@ export default function StandardGameBoard({
         setPauseTimer(false);
         setToggleDisabled(true);
     }
-
+    //making sure it logs the correct time when the timed game stops.
     useEffect(() => {
         if (gameOver && timerEnabled) console.log("Final time:", time)
     }, [gameOver])
 
-    useEffect(()=>{
+    //gets the user.data from local storage and from the database itself to make sure the user can't play twice in one day
+    useEffect(() => {
         const userData = JSON.parse(localStorage.getItem("userData"));
-
-        if(userData && userData.username){
-            const username = userData.username;
-            const fetchLastPLayed = async () =>{
-                try{
+        // Log user data
+        // console.log("User data from localStorage:", userData);
+    
+        // if (userData && userData.username) {
+        //     const fetchLastPlayed = async () => {
+        //         try {
+        //             const data = await getLastPlayed();
+        //             console.log("Last played from API:", data);  // Log data from API
+        //             setLastPlayed(data); 
+        //         } catch (e) {
+        //             console.error('Failed to fetch last played date from API', e);
+        //         }
+        //     };
+        //     fetchLastPlayed();
+        // }
+    
+        const storedLastPlayed = localStorage.getItem('lastPlayed'); // Retrieve lastPlayed from localStorage
+        console.log("Last played from localStorage:", storedLastPlayed);  // Log the last played date from localStorage
+    
+        const today = getCurrentDayOfYearEST().toString();  // Get today's date
+        console.log("Today's date:", today);  // Log today's date
+    
+        // Compare the stored date with today's date
+        if (storedLastPlayed && storedLastPlayed === today) {
+            setLastPlayed(today);  // Disable the game if the user has already played today
+        }else if (userData && userData.username){
+            const fetchLastPlayed = async () => {
+                try {
                     const data = await getLastPlayed();
-                    setLastPlayed(data)
-
-                }catch(e){
-                    console.error('Failed to fetch last played date',e)
+                    console.log("Last played from API:", data);  // Log data from API
+                    setLastPlayed(data); 
+                } catch (e) {
+                    console.error('Failed to fetch last played date from API', e);
                 }
-            }
-            fetchLastPLayed();
-        }else{
-            console.error("Fetch last played has no user data in local storage")
+            };
+            fetchLastPlayed();
         }
-    },[])
+    },[]);
     
     return (
         <Paper
@@ -141,7 +164,7 @@ export default function StandardGameBoard({
         }}
         >
             <div className="game-container">
-                {lastPlayed === currentDate || localLastPlayed === currentDate ? (
+                {lastPlayed == currentDate.toString() ? (
                     <div className="overlay">
                         <h3>You have already played today! Come back tomorrow!</h3>
                     </div>
