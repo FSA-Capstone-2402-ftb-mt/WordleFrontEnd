@@ -5,7 +5,7 @@ import getCurrentDayOfYearEST from "./DateHandler";
 import StopWatch from "./Stopwatch/Stopwatch";
 import {Box, Button, Paper} from "@mui/material";
 import { apiURL } from "../../hooks/api.js";
-import { getLastPlayed } from "../Statistics/hooks/useFetchStatistics.js";
+// import { getLastPlayed } from "../Statistics/hooks/useFetchStatistics.js";
 import SwitchLabels from "./SwitchLabels.jsx";
 
 export default function StandardGameBoard({
