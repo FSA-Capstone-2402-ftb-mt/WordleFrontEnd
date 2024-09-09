@@ -3,12 +3,15 @@ import React from 'react';
 export default function InstructionPage() {
     return (
         <>
-            <h1>How to Play Wordle</h1>
             <div>
+                <h1>How to play Wordle</h1>
                 <ol>
                     <li>Start by guessing any 5-letter word</li>
                     <li>After each guess the color of the tiles will change to show if the player use the correct or incorrect letter.</li>
-                    <ul>
+                    <ul style={{
+                       listStyle: "none", 
+                       padding: 0, 
+                    }}> 
                         <li>
                             <strong style={{
                                 color: "green",
