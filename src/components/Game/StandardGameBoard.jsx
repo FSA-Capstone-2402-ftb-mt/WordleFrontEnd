@@ -30,13 +30,10 @@ export default function StandardGameBoard({
     const [isPlaying, setIsPlaying] = useState(false)
     const[lastPlayed, setLastPlayed] = useState(null)
     const [timerEnabled, setTimerEnabled] = useState(false)
+    const [toggleDisabled, setToggleDisabled] = useState(false);
 
     const currentDate = getCurrentDayOfYearEST();
-    // console.log(last_played)
-    // console.log(`Today's date of ${currentDate} / 365`)
-    
-    // const userData = JSON.parse(localStorage.getItem("userData"));
-    // const username = userData.username;
+    const localLastPlayed = localStorage.getItem('Last_played')
     
     const handleRowComplete = (rowIndex) => {
         //This correctly sets game over to True if you fail to get the correct guess after 5 guesses
@@ -92,21 +89,29 @@ export default function StandardGameBoard({
     }
 
 //useEffect that runs UpdateStats when gameOver or activeRow changes
-    useEffect(() => {
+    useEffect((currentDate) => {
         if (gameOver) {
             updateStats(correctGuess, activeRow, word)
             setPauseTimer(true);
+            localStorage.setItem('Last_played', currentDate)
         }
     }, [activeRow, gameOver])
+
+    useEffect(()=>{
+        if(activeRow > 0 || gameOver){
+            setToggleDisabled(true);
+        }
+    },[activeRow, gameOver])
 
     const startGame = () => {
         setIsPlaying(true);
         setStartTimer(true);
         setPauseTimer(false);
+        setToggleDisabled(true);
     }
 
     useEffect(() => {
-        if (gameOver) console.log("Final time:", time)
+        if (gameOver && timerEnabled) console.log("Final time:", time)
     }, [gameOver])
 
     useEffect(()=>{
@@ -136,7 +141,7 @@ export default function StandardGameBoard({
         }}
         >
             <div className="game-container">
-                {lastPlayed === currentDate ? (
+                {lastPlayed === currentDate || localLastPlayed === currentDate ? (
                     <div className="overlay">
                         <h3>You have already played today! Come back tomorrow!</h3>
                     </div>
@@ -148,6 +153,8 @@ export default function StandardGameBoard({
                             <SwitchLabels
                                 timerEnabled={timerEnabled}
                                 setTimerEnabled={setTimerEnabled}
+                                disabled={toggleDisabled}
+                                hide={toggleDisabled}
                             />
                         </div>
                         <div>
