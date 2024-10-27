@@ -17,6 +17,16 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../Context/AuthContext.jsx';
 
+const errorText = "Please use correct username"; //using this const more then onces
+
+const sanitizeUserNameInput = (userNameString, setError) => { //created to prevent SQL injection hacking
+    if (userNameString.includes('SELECT')) {                 //Todo add more SQL keywords
+        console.log(errorText);
+        setError(errorText)
+        return;
+    }
+}
+
 export default function RegisterComponent() {
     const { register } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -31,15 +41,22 @@ export default function RegisterComponent() {
     const handleClickShowPassword = () => setShowPassword(!showPassword);
     const handleMouseDownPassword = (event) => event.preventDefault();
 
-    const handleRegister = async (e) => {
-        e.preventDefault();
-        setError(''); // Clear any previous error message
+    const handleRegister = async (event) => { //change e to event 
+        event.preventDefault();
+        if (error) {
+            setError(''); // Clear any previous error message
+        } 
+        if (username){ //
+            sanitizeUserNameInput(username);
+            
+        }
+
         if (!username || !email || !password || !confirmPassword) {
             setError("All fields are required");
             return;
         }
 
-        if (password !== confirmPassword) {
+        if (password !== confirmPassword) { //making sure both passwords are the same 
             setError("Passwords do not match");
             return;
         }
